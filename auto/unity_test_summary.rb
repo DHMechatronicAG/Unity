@@ -124,7 +124,7 @@ if $0 == __FILE__
   begin
     # look in the specified or current directory for result files
     args[0] ||= './'
-    targets = "#{ARGV[0].tr('\\', '/')}**/*.test*"
+    targets = "#{args[0].tr('\\', '/')}**/*.test*"
     results = Dir[targets]
 
     raise "No *.testpass, *.testfail, or *.testresults files found in '#{targets}'" if results.empty?
@@ -133,7 +133,7 @@ if $0 == __FILE__
 
     # set the root path
     args[1] ||= "#{Dir.pwd}/"
-    uts.root = ARGV[1]
+    uts.root = args[1]
 
     # run the summarizer
     puts uts.run

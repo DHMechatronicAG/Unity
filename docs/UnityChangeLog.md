@@ -18,6 +18,7 @@ Prior to 2008, the project was an internal project and not released to the publi
 Significant Bugfixes:
 
   - Default `UNITY_INCLUDE_EXEC_TIME` macros compile as ISO C99, are statement-safe, and accept `-Wsign-conversion` (#838)
+  - `unity_test_summary.rb` honors its own default result directory and root path again. @youdie006
 
 ### Unity 2.7.0 (July 2026)
 
