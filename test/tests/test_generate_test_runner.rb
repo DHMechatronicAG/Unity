@@ -1334,6 +1334,55 @@ should 'GenerateSuiteTeardownWhenBeginAndEndAreOmitted' do
   $generate_test_runner_tests += 1
 end
 
+should 'FindTestsLineNumbersWhenNameStartsTheLine' do
+  # The return type may sit on its own line, leaving the test name at column 0.
+  # The line search must still find the definition (and must not scan to the end
+  # of the file for every test, which is what made large files slow).
+  source = "#include \"unity.h\"\n" \
+           "\n" \
+           "void\n" \
+           "test_FirstAtColumnZero(void)\n" \
+           "{\n" \
+           "}\n" \
+           "\n" \
+           "void\n" \
+           "test_SecondAtColumnZero(void)\n" \
+           "{\n" \
+           "}\n"
+  found = UnityTestRunnerGenerator.new({}).find_tests(source).map { |t| [t[:test], t[:line_number]] }
+  expected = [['test_FirstAtColumnZero', 4], ['test_SecondAtColumnZero', 9]]
+  if found == expected
+    report 'Runner_FindTestsLineNumbersWhenNameStartsTheLine:PASS'
+  else
+    report "  FAIL: expected #{expected.inspect}, got #{found.inspect}"
+    report 'Runner_FindTestsLineNumbersWhenNameStartsTheLine:FAIL'
+    $generate_test_runner_failures += 1
+  end
+  $generate_test_runner_tests += 1
+end
+
+should 'FindTestsLineNumbersWhenOneNameIsAPrefixOfAnother' do
+  # Issue #288: test_my_function must not be located inside
+  # test_my_function_invalid_behavior, which is defined first.
+  source = "void test_my_function_invalid_behavior(void)\n" \
+           "{\n" \
+           "}\n" \
+           "\n" \
+           "void test_my_function(void)\n" \
+           "{\n" \
+           "}\n"
+  found = UnityTestRunnerGenerator.new({}).find_tests(source).map { |t| [t[:test], t[:line_number]] }
+  expected = [['test_my_function_invalid_behavior', 1], ['test_my_function', 5]]
+  if found == expected
+    report 'Runner_FindTestsLineNumbersWhenOneNameIsAPrefixOfAnother:PASS'
+  else
+    report "  FAIL: expected #{expected.inspect}, got #{found.inspect}"
+    report 'Runner_FindTestsLineNumbersWhenOneNameIsAPrefixOfAnother:FAIL'
+    $generate_test_runner_failures += 1
+  end
+  $generate_test_runner_tests += 1
+end
+
 RUNNER_TESTS.each do |testset|
   basename = File.basename(testset[:testfile], C_EXTENSION)
   testset_name = "Runner_#{basename}_#{testset[:name]}"

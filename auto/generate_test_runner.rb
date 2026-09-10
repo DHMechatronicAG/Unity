@@ -200,8 +200,10 @@ class UnityTestRunnerGenerator
     source_lines = source.split("\n")
     source_index = 0
     tests_and_line_numbers.size.times do |i|
+      # Compile once per test
+      name_regex = /(?:^|\s)#{tests_and_line_numbers[i][:test]}(?:\s|\()/
       source_lines[source_index..].each_with_index do |line, index|
-        next unless line =~ /\s+#{tests_and_line_numbers[i][:test]}(?:\s|\()/
+        next unless line =~ name_regex
 
         source_index += index
         tests_and_line_numbers[i][:line_number] = source_index + 1
